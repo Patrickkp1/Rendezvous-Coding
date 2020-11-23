@@ -1,0 +1,170 @@
+---
+title: "Rendezvous Lab"
+author: "Patrick Poleshuk"
+date: "11/4/2020"
+output:
+  pdf_document:
+    latex_engine: xelatex
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+```{r setup, include=TRUE, message=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+library (tidyverse)
+library(tinytex)
+time = runif(10000, 0, 60)
+time2 = runif(10000, 0, 60)
+
+diff = time - time2
+absdiff = abs(diff)
+
+hist(diff)
+hist(absdiff)
+
+meet = (absdiff < 15)
+plot(time, time2, type = 'n')
+points(time[meet=='TRUE'], time2[meet=='TRUE'], pch = 20, col = "green")
+points(time[meet=='FALSE'], time2[meet=='FALSE'], pch = 20, col = "red")
+# The number of points where they both meet are outlined in green. 
+# While the the points where they don't meet are outlined in red. 
+
+probmeet = sum(meet)/10000
+probmeet
+
+# The probability that they both meet each other is .438, using 10,000 simulations. 
+
+time = runif(100000, 0, 60)
+time2 = runif(100000, 0, 60)
+
+diff = time - time2
+absdiff = abs(diff)
+
+meet = (absdiff < 15)
+plot(time, time2, type = 'n')
+points(time[meet=='TRUE'], time2[meet=='TRUE'], pch = 20, col = "green")
+points(time[meet=='FALSE'], time2[meet=='FALSE'], pch = 20, col = "red")
+
+probmeet = sum(meet)/100000
+probmeet
+
+# Using 1 million simulations, the probability that meet is .43788. 
+
+Actual_Prob = x/3600
+
+Total_Area = 60*60
+Fail_Area = 2 * .5*45*45
+Success = Total_Area - Fail_Area
+Actual_Prob_of_Success = Success / (Total_Area)
+Actual_Prob_of_Success
+
+```
+
+## Including Plots
+
+```{r Plot, message=FALSE}
+# Assuming they wait 60 minutes for each other. 
+
+time = runif(100000, 0, 60)
+time2 = runif(100000, 0, 60)
+
+diff = time - time2
+absdiff = abs(diff)
+
+meet = (absdiff < 60)
+plot(time, time2, type = 'n', xlab = "With m=60, and Prob_of_sucess = 1 - (60-m)^2 / 3600. You will always succeed")
+points(time[meet=='TRUE'], time2[meet=='TRUE'], pch = 20, col = "green")
+points(time[meet=='FALSE'], time2[meet=='FALSE'], pch = 20, col = "red")
+
+probmeet = sum(meet)/100000
+probmeet
+
+# Assuming they don't wait for each other at all. 
+
+time = runif(100000, 0, 60)
+time2 = runif(100000, 0, 60)
+
+diff = time - time2
+absdiff = abs(diff)
+
+meet = (absdiff < 0)
+plot(time, time2, type = 'n', xlab = "With m=0, and Prob_of_sucess = 1 - (60-m)^2 / 3600. You will always fail")
+points(time[meet=='TRUE'], time2[meet=='TRUE'], pch = 20, col = "green")
+points(time[meet=='FALSE'], time2[meet=='FALSE'], pch = 20, col = "red")
+
+probmeet = sum(meet)/100000
+probmeet
+
+# If they refuse to wait at all for the other person they will never meet up, but if they wait the full hour 
+# (60 minutes) they will always meet up. 
+# The function that I found is for P(of 2 people meeting up assuming they both wait (m) minutes) = 1 - [(60-m^2) / 3600]
+# In other words, with a wait time m the total probability of of a successful meeting is the total probability (1) 
+# minus the probability that 
+# they fail to meet within the hour using (60-m)/60 two times (in which case you square this value)
+
+time = rnorm(10000, 30, 10)
+time2 = rnorm(10000, 30, 10)
+
+diff = time - time2
+absdiff = abs(diff)
+
+meet = (absdiff < 15)
+plot(time, time2, type = 'n') 
+points(time[meet=='TRUE'], time2[meet=='TRUE'], pch = 20, col = "green")
+points(time[meet=='FALSE'], time2[meet=='FALSE'], pch = 20, col = "red")
+
+# In this new graph, you will see that, for the meeting times, they are no 
+# longer contained within a 60 minute interval. This leads us to get
+# observations that are in the negative digits or observations that imply that 
+# they will wait past a full hour after noon. In terms of successes, # it appears to follow a similiar, but uncontained, success distribution 
+# comparable to the first plot. 
+probmeet = sum(meet)/10000
+probmeet
+
+# The probability that they meet up, assuming a normal distribution, is .7155. 
+summary(time)
+summary(time2)
+Prob_distribution_diff = summary(time) - summary(time2)
+Prob_distribution_diff
+# On average, Kareem (representing "time") arrives 30.02 minutes after noon. While Kathleen (representing "time2") 
+# arrives 30.07 minutes after noon. 
+# The probability distribution of the difference between arrival times of the 2 people is summarized below. 
+# We can see that on average, their mean arrival times were .05417 minutes apart from each other. More specifically, 
+# Kareem arrives .05417 minutes earlier, on average, than Kathleen. 
+
+hist(diff)
+hist(absdiff)
+
+x <- seq(from = min(diff), to = max(diff))
+mu <- mean(diff)
+sigma <- sd(diff)
+density <- dnorm(x,mu,sigma)
+plot(x, density, type = "l", xlab = "Wait Time Differences", ylab = "Probability Density")
+abline(v=mu)
+
+sd(diff)
+# The standard deviation of differences is roughly 14.116. 
+# The probability of success is z.
+
+z = (15 - .05417) / 14.116
+pnorm(z)
+
+z2 = (-15 - .05417) / 14.116
+pnorm(z2)
+
+Prob_of_Meet = pnorm(z) - pnorm(z2)
+Prob_of_Meet
+# We get a value of .712, which is very close to the other simulated method, provided in the above code.
+
+# An area of .9 corresponds to a z-score of 1.29. 
+# 1.29 = (x-.05417) / 14.116.
+(1.29 * 14.116) + .05417 
+# m needs to be 18.26381 minutes.
+
+# To determine how small the standard deviation needs to be in this case, we need to use formula 
+# 1.29 = (15-.05417) / sd
+(15 - .05417) / 1.29
+# The standard deviation (sd) should be 11.58591. 
+```
